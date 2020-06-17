@@ -7,6 +7,7 @@ namespace euler
         static void Main(string[] args)
         {
             
+
         }
     }
 }
