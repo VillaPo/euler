@@ -16,6 +16,18 @@ namespace euler
             return (b % a == 0);
         }
 
+        static void PrintGroup(int[] group, int num)
+        {
+            Console.Write($"Группа {num}:\t");
+            foreach (var item in group)
+            {
+                if (item > 0)
+                Console.Write($"{item: 6}");
+            }
+            Console.WriteLine();
+        }
+
+
         /// <summary>
         /// Программа нахождения групп некратных друг другу чисел в отрезке числового ряда
         /// от 1 до заданного целого числа.
@@ -30,11 +42,11 @@ namespace euler
             {
                 mask[i] = 1;
             }
-
+           
             int[] deb_group = new int[bigNum];                                  // временный массив для хранения группы, нужен только для отладки
             int mCount = 1;                                                     // счетчик групп чисел. Первая группа состоит из одного числа - 1
             Console.WriteLine($"Заданный числовой отрезок: от 1 до {bigNum}.\n");
-            Console.WriteLine($"Группа { mCount}:\t\t{1: 6}\n");
+            Console.WriteLine($"Группа 1:\t\t1\n");
             int kGroup;                                                        // индекс для обращения к элементу группы
             int iMask;                                                         // индекс маски
             
@@ -51,19 +63,45 @@ namespace euler
                         iMask++;
                     }
                 }
-                while (deb_group[0] == 0 || iMask <= bigNum);
+                while (deb_group[0] == 0 && iMask <= bigNum);
 
                 if (iMask > bigNum && deb_group[0] != 0)
                 {
-                    Console.Write($"Группа {mCount}:\t\t {deb_group[0]: 6}");
+                    mCount++;
+                    Console.Write($"Группа {mCount}:\t {deb_group[0]}");
+                    Console.ReadKey();
                     break;
                 }
                 else if (iMask > bigNum) break;
 
-                for (int j = 0; j < length; j++)
+                                                                 
+                
+                for (kGroup = 1; kGroup <bigNum; kGroup++)                          // для записи каждого нового числа в группе
                 {
-
+                    bool isOK;                                                      // флаг того, что число может быть записано в текущую группу
+                    for (int j = iMask; j <=bigNum; j++)                            // прогоняем все немаскированные числа по каждому числу, которое уже есть в группе
+                    {
+                        isOK = true;                                                
+                        for (int k = 0; k < kGroup; k++)
+                        {
+                            if (mask[j] == 0 || !Aliquant(deb_group[k], j))
+                            {
+                                isOK = false;
+                                break;
+                            }
+                        }
+                        if (isOK)
+                        {
+                            deb_group[kGroup] = j;
+                            iMask = j + 1;
+                            break;
+                        }
+                            
+                    }
+                    mCount++;
+                    PrintGroup(deb_group, mCount);
                 }
+                Console.ReadKey();
             }
              
 
