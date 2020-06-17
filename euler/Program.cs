@@ -22,7 +22,7 @@ namespace euler
             foreach (var item in group)
             {
                 if (item > 0)
-                Console.Write($"{item: 6}");
+                Console.Write($" {item}");
             }
             Console.WriteLine();
         }
@@ -38,7 +38,7 @@ namespace euler
             int bigNum = 50;                                                    // длинна числового ряда от 1 до bigNum
             byte[] mask = new byte[bigNum+1];                                   // маска чисел, инициализируем единицами:
             
-            for (int i = 1; i <= bigNum; i++)
+            for (int i = 2; i <= bigNum; i++)
             {
                 mask[i] = 1;
             }
@@ -46,7 +46,7 @@ namespace euler
             int[] deb_group = new int[bigNum];                                  // временный массив для хранения группы, нужен только для отладки
             int mCount = 1;                                                     // счетчик групп чисел. Первая группа состоит из одного числа - 1
             Console.WriteLine($"Заданный числовой отрезок: от 1 до {bigNum}.\n");
-            Console.WriteLine($"Группа 1:\t\t1\n");
+            Console.WriteLine($"Группа 1:\t 1\n");
             int kGroup;                                                        // индекс для обращения к элементу группы
             int iMask;                                                         // индекс маски
             
@@ -60,8 +60,9 @@ namespace euler
                     {
                         deb_group[0] = iMask;
                         mask[iMask] = 0;                                            // и маскируем его, чтобы больше не использовать
-                        iMask++;
+                        
                     }
+                    iMask++;
                 }
                 while (deb_group[0] == 0 && iMask <= bigNum);
 
@@ -84,15 +85,16 @@ namespace euler
                         isOK = true;                                                
                         for (int k = 0; k < kGroup; k++)
                         {
-                            if (mask[j] == 0 || !Aliquant(deb_group[k], j))
+                            if (mask[j] == 0 || Aliquant(deb_group[k], j))
                             {
                                 isOK = false;
                                 break;
                             }
-                        }
+                                                    }
                         if (isOK)
                         {
                             deb_group[kGroup] = j;
+                            mask[j] = 0;
                             iMask = j + 1;
                             break;
                         }
