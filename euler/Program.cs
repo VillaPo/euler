@@ -13,7 +13,7 @@ namespace euler
         /// <returns>true - если b делится на a без остатка, false - если нет</returns>
         static bool Aliquant(int a, int b)
         {
-            return (b % a == 0);
+            return (b % a != 0);
         }
 
         static void PrintGroup(int[] group, int num)
@@ -35,7 +35,7 @@ namespace euler
         /// <param name="args"></param>
         static void Main(string[] args)
         {
-            int bigNum = 50;                                                    // длинна числового ряда от 1 до bigNum
+            int bigNum = 10;                                                    // длинна числового ряда от 1 до bigNum
             byte[] mask = new byte[bigNum+1];                                   // маска чисел, инициализируем единицами:
             
             for (int i = 2; i <= bigNum; i++)
@@ -53,7 +53,8 @@ namespace euler
             while (true)
             {
                 iMask = 1;
-                kGroup = 0;
+                for (kGroup = 0; kGroup < bigNum; kGroup++)
+                    deb_group[kGroup] = 0;
                 do                                                              // находим первый элемент группы - первое число, которое не было ранее задействовано
                 {
                     if (mask[iMask] != 0)
@@ -82,15 +83,18 @@ namespace euler
                     bool isOK;                                                      // флаг того, что число может быть записано в текущую группу
                     for (int j = iMask; j <=bigNum; j++)                            // прогоняем все немаскированные числа по каждому числу, которое уже есть в группе
                     {
+                        if (mask[j] == 0) continue;
                         isOK = true;                                                
+                        
                         for (int k = 0; k < kGroup; k++)
                         {
-                            if (mask[j] == 0 || Aliquant(deb_group[k], j))
+                            if (!Aliquant(deb_group[k], j))
                             {
                                 isOK = false;
                                 break;
                             }
-                                                    }
+                        }
+                        
                         if (isOK)
                         {
                             deb_group[kGroup] = j;
@@ -100,14 +104,15 @@ namespace euler
                         }
                             
                     }
-                    mCount++;
-                    PrintGroup(deb_group, mCount);
+                    
                 }
+                mCount++;
+                PrintGroup(deb_group, mCount);
                 Console.ReadKey();
             }
-             
 
-
+            Console.WriteLine("Всё закончилось :(");
+            Console.ReadKey();
 
         }
     }
