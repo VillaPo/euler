@@ -35,7 +35,9 @@ namespace euler
         /// <param name="args"></param>
         static void Main(string[] args)
         {
-            int bigNum = 10;                                                    // длинна числового ряда от 1 до bigNum
+            int bigNum = 1_000_000;                                                    // длинна числового ряда от 1 до bigNum
+            DateTime time = DateTime.Now; 
+
             byte[] mask = new byte[bigNum+1];                                   // маска чисел, инициализируем единицами:
             
             for (int i = 2; i <= bigNum; i++)
@@ -107,11 +109,13 @@ namespace euler
                     
                 }
                 mCount++;
-                PrintGroup(deb_group, mCount);
-                Console.ReadKey();
+                //PrintGroup(deb_group, mCount);
+                //Console.ReadKey();
             }
-
+            TimeSpan wasted = DateTime.Now.Subtract(time);
             Console.WriteLine("Всё закончилось :(");
+            Console.WriteLine($"Было сформировано {mCount} групп.");
+            Console.WriteLine($"Для этого потребовалось {wasted.TotalSeconds} секунд машинного времени.");
             Console.ReadKey();
 
         }
