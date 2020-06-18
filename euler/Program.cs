@@ -35,36 +35,39 @@ namespace euler
         /// <param name="args"></param>
         static void Main(string[] args)
         {
-            int bigNum = 1_000_000;                                                    // длинна числового ряда от 1 до bigNum
+            int bigNum = 1_000_000;                                                     // длинна числового ряда от 1 до bigNum
             DateTime time = DateTime.Now; 
 
-            byte[] mask = new byte[bigNum+1];                                   // маска чисел, инициализируем единицами:
+            byte[] mask = new byte[bigNum+1];                                           // маска чисел, инициализируем единицами:
             
             for (int i = 2; i <= bigNum; i++)
             {
                 mask[i] = 1;
             }
            
-            int[] deb_group = new int[bigNum];                                  // временный массив для хранения группы, нужен только для отладки
-            int mCount = 1;                                                     // счетчик групп чисел. Первая группа состоит из одного числа - 1
+            int[] deb_group = new int[bigNum];                                          // временный массив для хранения группы, нужен только для отладки
+            int mCount = 1;                                                             // счетчик групп чисел. Первая группа состоит из одного числа - 1
             Console.WriteLine($"Заданный числовой отрезок: от 1 до {bigNum}.\n");
             Console.WriteLine($"Группа 1:\t 1\n");
-            int kGroup;                                                        // индекс для обращения к элементу группы
-            int iMask;                                                         // индекс маски
+            int kGroup;                                                                 // индекс для обращения к элементу группы
+            int iMask;                                                                  // индекс маски
+            int lastPosFirst =1;                                                        // последний из найденных первых элементов группы
             
             while (true)
             {
-                iMask = 1;
+                iMask = lastPosFirst + 1;
                 for (kGroup = 0; kGroup < bigNum; kGroup++)
                     deb_group[kGroup] = 0;
-                do                                                              // находим первый элемент группы - первое число, которое не было ранее задействовано
+                do                                                                      // находим первый элемент группы - первое число, которое не было ранее задействовано
                 {
-                    if (mask[iMask] != 0)
+                    if (mask[iMask] == 0)
                     {
-                        deb_group[0] = iMask;
-                        mask[iMask] = 0;                                            // и маскируем его, чтобы больше не использовать
-                        
-                    }
+                        iMask++;
+                        continue;
+                    }    
+                    deb_group[0] = iMask;
+                    mask[iMask] = 0;                                                // и маскируем его, чтобы больше не использовать
+                    lastPosFirst = iMask;
                     iMask++;
                 }
                 while (deb_group[0] == 0 && iMask <= bigNum);
@@ -80,12 +83,13 @@ namespace euler
 
                                                                  
                 
-                for (kGroup = 1; kGroup <bigNum; kGroup++)                          // для записи каждого нового числа в группе
+                for (kGroup = 1; kGroup < bigNum; kGroup++)                              // для записи каждого нового числа в группе
                 {
-                    bool isOK;                                                      // флаг того, что число может быть записано в текущую группу
-                    for (int j = iMask; j <=bigNum; j++)                            // прогоняем все немаскированные числа по каждому числу, которое уже есть в группе
+                    bool isOK;                                                          // флаг того, что число может быть записано в текущую группу
+                    for (int j = iMask; j <= bigNum; j++)                                // прогоняем все немаскированные числа по каждому числу, которое уже есть в группе
                     {
                         if (mask[j] == 0) continue;
+                        
                         isOK = true;                                                
                         
                         for (int k = 0; k < kGroup; k++)
