@@ -10,7 +10,7 @@ namespace euler
         /// </summary>
         /// <param name="a">делитель</param>
         /// <param name="b">делимое</param>
-        /// <returns>true - если b делится на a без остатка, false - если нет</returns>
+        /// <returns>true - если b не делится на a без остатка, false - если делится</returns>
         static bool Aliquant(int a, int b)
         {
             return (b % a != 0);
@@ -35,7 +35,7 @@ namespace euler
         /// <param name="args"></param>
         static void Main(string[] args)
         {
-            int bigNum = 1_000_000;                                                     // длинна числового ряда от 1 до bigNum
+            int bigNum = 1_000_000_000;                                                     // длинна числового ряда от 1 до bigNum
             DateTime time = DateTime.Now; 
 
             byte[] mask = new byte[bigNum+1];                                           // маска чисел, инициализируем единицами:
