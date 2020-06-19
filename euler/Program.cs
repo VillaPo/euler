@@ -110,8 +110,10 @@ namespace euler
                         }
                             
                     }
-                    
+                    if (deb_group[kGroup] == 0) break;
                 }
+                
+
                 mCount++;
                 //PrintGroup(deb_group, mCount);
                 //Console.ReadKey();
