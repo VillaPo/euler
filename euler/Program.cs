@@ -10,7 +10,7 @@ namespace euler
         /// </summary>
         /// <param name="a">делитель</param>
         /// <param name="b">делимое</param>
-        /// <returns>true - если b делится на a без остатка, false - если нет</returns>
+        /// <returns>true - если b не делится на a без остатка, false - если делится</returns>
         static bool Aliquant(int a, int b)
         {
             return (b % a != 0);
