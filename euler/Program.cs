@@ -35,12 +35,12 @@ namespace euler
         /// <param name="args"></param>
         static void Main(string[] args)
         {
-            int bigNum = 1_000_000_000;                                                     // длинна числового ряда от 1 до bigNum
+            int bigNum = 1_000_000;                                                     // длинна числового ряда от 1 до bigNum
             DateTime time = DateTime.Now; 
 
             byte[] mask = new byte[bigNum+1];                                           // маска чисел, инициализируем единицами:
             
-            for (int i = 2; i <= bigNum; i++)
+            for (int i = 2; i < mask.Length; i++)
             {
                 mask[i] = 1;
             }
@@ -56,7 +56,7 @@ namespace euler
             while (true)
             {
                 iMask = lastPosFirst + 1;
-                for (kGroup = 0; kGroup < bigNum; kGroup++)
+                for (kGroup = 0; kGroup < deb_group.Length; kGroup++)
                     deb_group[kGroup] = 0;
                 do                                                                      // находим первый элемент группы - первое число, которое не было ранее задействовано
                 {
@@ -83,10 +83,10 @@ namespace euler
 
                                                                  
                 
-                for (kGroup = 1; kGroup < bigNum; kGroup++)                              // для записи каждого нового числа в группе
+                for (kGroup = 1; kGroup < deb_group.Length; kGroup++)                              // для записи каждого нового числа в группе
                 {
                     bool isOK;                                                          // флаг того, что число может быть записано в текущую группу
-                    for (int j = iMask; j <= bigNum; j++)                                // прогоняем все немаскированные числа по каждому числу, которое уже есть в группе
+                    for (int j = iMask; j < mask.Length; j++)                                // прогоняем все немаскированные числа по каждому числу, которое уже есть в группе
                     {
                         if (mask[j] == 0) continue;
                         
@@ -94,7 +94,7 @@ namespace euler
                         
                         for (int k = 0; k < kGroup; k++)
                         {
-                            if (!Aliquant(deb_group[k], j))
+                            if ((j % deb_group[k]) == 0)
                             {
                                 isOK = false;
                                 break;
