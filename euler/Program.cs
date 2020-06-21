@@ -75,7 +75,7 @@ namespace euler
                 if (iMask > bigNum && deb_group[0] != 0)
                 {
                     mCount++;
-                    Console.Write($"Группа {mCount}:\t {deb_group[0]}");
+                    Console.WriteLine($"Группа {mCount}:\t {deb_group[0]}");
                     Console.ReadKey();
                     break;
                 }
