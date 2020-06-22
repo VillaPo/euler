@@ -11,6 +11,26 @@ namespace euler
         // Все остальные числа будут формировать группы с номером, равным количеству их простых множителей (включая 1),
         // т.к. внутри группы они не будут взаимно делиться.
 
+        static int[] OptimizedPrimeCount(int N)
+        {
+            int[] lp = new int[N + 1];   //массив наименьших делителей, изначально напротив каждого числа (индекса массива) стоит 0
+
+            for (int i = 2; i <= N; i++)
+            {
+                if (lp[i] == 0)
+                   lp[i] = i;                                           // это простое число и мы записываем туда само число как наименьший делитель
+                for (int p = 2; p <= lp[i]; p++)
+                {
+                    if (p * i > N) break;                               // если за пределами отрезка, бросаем это
+                    if (p == lp[p])                                     // если p  простое   
+                        lp[i * p] = p;                                  // все кратные ему числа будут иметь такой минимальный делитель.
+                }
+
+            }
+            return lp;
+        }
+
+
         /// <summary>
         /// Подсчитывает количество простых множителей для каждого целого числа от 1 до N
         /// </summary>
@@ -36,11 +56,11 @@ namespace euler
                     if (allNums[j] == 2)                                //проверяем делимость только на простые числа!
                     {
 
-                        if (i % j == 0)
+                        if (i % j == 0) // нужно оптимизировать иф
                         {
                             q = i / j;
                             allNums[i] = 1 + allNums[q];                    // если разделилось - плюсуем единичку
-                                                                            // и добавляем все делители полученного частного, которые известны
+                                                                            // и добавляем все делители полученного частного, которые уже известны
                             isPrime = false;                                // и оно точно не простое
                             break;                                          // для этого числа работа сделана
                         }
@@ -109,7 +129,7 @@ namespace euler
 
             //int[] deb_group = new int[bigNum];                                          // временный массив для хранения группы, нужен только для отладки
             //int mCount = 1;                                                             // счетчик групп чисел. Первая группа состоит из одного числа - 1
-            Console.WriteLine($"Заданный числовой отрезок: от 1 до {bigNum}.\n");
+            Console.WriteLine($"Заданный числовой отрезок: от 1 до {bigNum : ### ### ### ###}.\n");
             //Console.WriteLine($"Группа 1:\t 1\n");
             //int kGroup;                                                                 // индекс для обращения к элементу группы
             //int iMask;                                                                  // индекс маски
@@ -181,12 +201,14 @@ namespace euler
             //    //Console.ReadKey();
             //}
 
-            int[] groups = Factorized(bigNum);
+            //int[] groups = Factorized(bigNum);
             //PrintAllGroups(groups);
+            int[] test = OptimizedPrimeCount(bigNum);
+            //PrintGroup(test, 0);
 
             TimeSpan wasted = DateTime.Now.Subtract(time);
             Console.WriteLine("Всё закончилось :(");
-            Console.WriteLine($"Было сформировано {Convert.ToInt32(Math.Floor(Math.Log2(bigNum))) + 1} групп.");
+            //Console.WriteLine($"Было сформировано {Convert.ToInt32(Math.Floor(Math.Log2(bigNum))) + 1} групп.");
             Console.WriteLine($"Для этого потребовалось {wasted.TotalSeconds} секунд машинного времени.");
             Console.ReadKey();
 
