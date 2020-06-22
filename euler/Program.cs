@@ -4,7 +4,54 @@ using System.Security.Authentication;
 namespace euler
 {    
     class Program
-    {
+    {   
+        // Задача сводится к подсчету простых множителей каждого целого числа от 1 до заданного.
+        // Для этого построим массив, индексы которого будут наши числа, а значение элемента - количество простых множителей
+        // этого числа. 2 множителя - число простое (1 и само число) - эти числа попадут в группу №2
+        // Все остальные числа будут формировать группы с номером, равным количеству их простых множителей (включая 1),
+        // т.к. внутри группы они не будут взаимно делиться.
+
+        /// <summary>
+        /// Подсчитывает количество простых множителей для каждого целого числа от 1 до N
+        /// </summary>
+        /// <param name="N">Верхняя граница числового отрезка</param>
+        /// <returns>Массив, содержащий количество простых множителей (включая 1) для каждого значения индекса</returns>
+        static int[] Factorized(int N)
+        {
+            int[] allNums = new int[N + 1];   //изначально напротив каждого числа (индекса массива) стоит 0
+
+            // allNums[0] = 0 - ноль нас не интересует
+
+            allNums[1] = 1;
+            allNums[2] = 2;             // простое число
+            allNums[3] = 2;
+            int q;                      // частное от деления
+            bool isPrime;
+
+            for (int i = 4; i < allNums.Length; i++)
+            {
+                isPrime = true;                                         // начальное предположение
+                for (int j = 2; j <= (int)Math.Sqrt(i); j++)            //нет смысла искать простые множители числа, большие его квадратного корня
+                {
+                    if (allNums[j] == 2)                                //проверяем делимость только на простые числа!
+                    {
+
+                        if (i % j == 0)
+                        {
+                            q = i / j;
+                            allNums[i] = 1 + allNums[q];                    // если разделилось - плюсуем единичку
+                                                                            // и добавляем все делители полученного частного, которые известны
+                            isPrime = false;                                // и оно точно не простое
+                            break;                                          // для этого числа работа сделана
+                        }
+                    }
+                }
+                if (isPrime)
+                    allNums[i] = 2;
+            }
+            return allNums;
+        }
+
         /// <summary>
         /// Определяет, делится ли одно число на другое без остатка.
         /// </summary>
@@ -27,6 +74,21 @@ namespace euler
             Console.WriteLine();
         }
 
+        static void PrintAllGroups(int[] nums)
+        {
+            int count = Convert.ToInt32(Math.Floor(Math.Log2(nums.GetUpperBound(0)))) + 1;
+
+            for (int i = 1; i <= count; i++)
+            {
+                Console.Write($"Группа {i}:\t");
+                for (int j = 0; j < nums.Length; j++)
+                {
+                    if (nums[j] == i)
+                        Console.Write(j.ToString() + "  ");
+                }
+                Console.WriteLine();
+            }
+        }
 
         /// <summary>
         /// Программа нахождения групп некратных друг другу чисел в отрезке числового ряда
@@ -35,92 +97,96 @@ namespace euler
         /// <param name="args"></param>
         static void Main(string[] args)
         {
-            int bigNum = 1_000_000;                                                     // длинна числового ряда от 1 до bigNum
-            DateTime time = DateTime.Now; 
+            int bigNum = 1_000_000_000;                                                     // длинна числового ряда от 1 до bigNum
+            DateTime time = DateTime.Now;
 
-            byte[] mask = new byte[bigNum+1];                                           // маска чисел, инициализируем единицами:
-            
-            for (int i = 2; i < mask.Length; i++)
-            {
-                mask[i] = 1;
-            }
-           
-            int[] deb_group = new int[bigNum];                                          // временный массив для хранения группы, нужен только для отладки
-            int mCount = 1;                                                             // счетчик групп чисел. Первая группа состоит из одного числа - 1
+            //byte[] mask = new byte[bigNum+1];                                           // маска чисел, инициализируем единицами:
+
+            //for (int i = 2; i < mask.Length; i++)
+            //{
+            //    mask[i] = 1;
+            //}
+
+            //int[] deb_group = new int[bigNum];                                          // временный массив для хранения группы, нужен только для отладки
+            //int mCount = 1;                                                             // счетчик групп чисел. Первая группа состоит из одного числа - 1
             Console.WriteLine($"Заданный числовой отрезок: от 1 до {bigNum}.\n");
-            Console.WriteLine($"Группа 1:\t 1\n");
-            int kGroup;                                                                 // индекс для обращения к элементу группы
-            int iMask;                                                                  // индекс маски
-            int lastPosFirst =1;                                                        // последний из найденных первых элементов группы
-            
-            while (true)
-            {
-                iMask = lastPosFirst + 1;
-                for (kGroup = 0; kGroup < deb_group.Length; kGroup++)
-                    deb_group[kGroup] = 0;
-                do                                                                      // находим первый элемент группы - первое число, которое не было ранее задействовано
-                {
-                    if (mask[iMask] == 0)
-                    {
-                        iMask++;
-                        continue;
-                    }    
-                    deb_group[0] = iMask;
-                    mask[iMask] = 0;                                                // и маскируем его, чтобы больше не использовать
-                    lastPosFirst = iMask;
-                    iMask++;
-                }
-                while (deb_group[0] == 0 && iMask <= bigNum);
+            //Console.WriteLine($"Группа 1:\t 1\n");
+            //int kGroup;                                                                 // индекс для обращения к элементу группы
+            //int iMask;                                                                  // индекс маски
+            //int lastPosFirst =1;                                                        // последний из найденных первых элементов группы
 
-                if (iMask > bigNum && deb_group[0] != 0)
-                {
-                    mCount++;
-                    Console.WriteLine($"Группа {mCount}:\t {deb_group[0]}");
-                    Console.ReadKey();
-                    break;
-                }
-                else if (iMask > bigNum) break;
+            //while (true)
+            //{
+            //    iMask = lastPosFirst + 1;
+            //    for (kGroup = 0; kGroup < deb_group.Length; kGroup++)
+            //        deb_group[kGroup] = 0;
+            //    do                                                                      // находим первый элемент группы - первое число, которое не было ранее задействовано
+            //    {
+            //        if (mask[iMask] == 0)
+            //        {
+            //            iMask++;
+            //            continue;
+            //        }    
+            //        deb_group[0] = iMask;
+            //        mask[iMask] = 0;                                                // и маскируем его, чтобы больше не использовать
+            //        lastPosFirst = iMask;
+            //        iMask++;
+            //    }
+            //    while (deb_group[0] == 0 && iMask <= bigNum);
 
-                                                                 
-                
-                for (kGroup = 1; kGroup < deb_group.Length; kGroup++)                              // для записи каждого нового числа в группе
-                {
-                    bool isOK;                                                          // флаг того, что число может быть записано в текущую группу
-                    for (int j = iMask; j < mask.Length; j++)                                // прогоняем все немаскированные числа по каждому числу, которое уже есть в группе
-                    {
-                        if (mask[j] == 0) continue;
-                        
-                        isOK = true;                                                
-                        
-                        for (int k = 0; k < kGroup; k++)
-                        {
-                            if ((j % deb_group[k]) == 0)
-                            {
-                                isOK = false;
-                                break;
-                            }
-                        }
-                        
-                        if (isOK)
-                        {
-                            deb_group[kGroup] = j;
-                            mask[j] = 0;
-                            iMask = j + 1;
-                            break;
-                        }
-                            
-                    }
-                    if (deb_group[kGroup] == 0) break;
-                }
-                
+            //    if (iMask > bigNum && deb_group[0] != 0)
+            //    {
+            //        mCount++;
+            //        Console.WriteLine($"Группа {mCount}:\t {deb_group[0]}");
 
-                mCount++;
-                //PrintGroup(deb_group, mCount);
-                //Console.ReadKey();
-            }
+            //        break;
+            //    }
+            //    else if (iMask > bigNum) break;
+
+
+
+            //    for (kGroup = 1; kGroup < deb_group.Length; kGroup++)                              // для записи каждого нового числа в группе
+            //    {
+            //        bool isOK;                                                          // флаг того, что число может быть записано в текущую группу
+            //        for (int j = iMask; j < mask.Length; j++)                                // прогоняем все немаскированные числа по каждому числу, которое уже есть в группе
+            //        {
+            //            if (mask[j] == 0) continue;
+
+            //            isOK = true;                                                
+
+            //            for (int k = 0; k < kGroup; k++)
+            //            {
+            //                if ((j % deb_group[k]) == 0)
+            //                {
+            //                    isOK = false;
+            //                    break;
+            //                }
+            //            }
+
+            //            if (isOK)
+            //            {
+            //                deb_group[kGroup] = j;
+            //                mask[j] = 0;
+            //                iMask = j + 1;
+            //                break;
+            //            }
+
+            //        }
+            //        if (deb_group[kGroup] == 0) break;
+            //    }
+
+
+            //    mCount++;
+            //    PrintGroup(deb_group, mCount);
+            //    //Console.ReadKey();
+            //}
+
+            int[] groups = Factorized(bigNum);
+            //PrintAllGroups(groups);
+
             TimeSpan wasted = DateTime.Now.Subtract(time);
             Console.WriteLine("Всё закончилось :(");
-            Console.WriteLine($"Было сформировано {mCount} групп.");
+            Console.WriteLine($"Было сформировано {Convert.ToInt32(Math.Floor(Math.Log2(bigNum))) + 1} групп.");
             Console.WriteLine($"Для этого потребовалось {wasted.TotalSeconds} секунд машинного времени.");
             Console.ReadKey();
 
