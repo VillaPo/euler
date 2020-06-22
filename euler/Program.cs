@@ -4,13 +4,18 @@ using System.Security.Authentication;
 namespace euler
 {    
     class Program
-    {   
+    {
         // Задача сводится к подсчету простых множителей каждого целого числа от 1 до заданного.
         // Для этого построим массив, индексы которого будут наши числа, а значение элемента - количество простых множителей
         // этого числа. 2 множителя - число простое (1 и само число) - эти числа попадут в группу №2
         // Все остальные числа будут формировать группы с номером, равным количеству их простых множителей (включая 1),
         // т.к. внутри группы они не будут взаимно делиться.
 
+        /// <summary>
+        /// Подсчитывает количество простых множителей для каждого целого числа от 1 до N используя модифицированное решето Эйлера.
+        /// </summary>
+        /// <param name="N"></param>
+        /// <returns></returns>
         static int[] OptimizedPrimeCount(int N)
         {
             int[] lp = new int[N + 1];   //массив наименьших делителей, изначально напротив каждого числа (индекса массива) стоит 0
@@ -27,7 +32,28 @@ namespace euler
                 }
 
             }
-            return lp;
+
+            // после того, как сформировали массив с минимальными делителями всех чисел, перепишем его под наши нужды:
+            // напротив каждого индекса должен стоять номер группы, в которую оно попадает, равный числу его простых множителей, включая 1
+
+            int[] allNums = new int[N + 1];   
+
+            // allNums[0] = 0 - ноль нас не интересует
+
+            allNums[1] = 1;
+            int q;              //частное от деления
+
+            for (int i = 2; i < allNums.Length; i++)
+            {
+                if (lp[i] == i)
+                    allNums[i] = 2;                                         // это простое число
+                else
+                {
+                    q = i / lp[i];                                          // если не простое, находим частное от деления на наименьший множитель
+                    allNums[i] = 1 + allNums[q];                                      // и подсчитываем число его простых множителей как 1 + к-во множителей частного
+                }
+            }
+            return allNums;
         }
 
 
@@ -117,6 +143,7 @@ namespace euler
         /// <param name="args"></param>
         static void Main(string[] args)
         {
+            // *************************************************************************************************************
             int bigNum = 1_000_000_000;                                                     // длинна числового ряда от 1 до bigNum
             DateTime time = DateTime.Now;
 
@@ -200,15 +227,15 @@ namespace euler
             //    PrintGroup(deb_group, mCount);
             //    //Console.ReadKey();
             //}
-
-            //int[] groups = Factorized(bigNum);
+            // ******************************************************************************************
+            int[] groups = OptimizedPrimeCount(bigNum);
             //PrintAllGroups(groups);
-            int[] test = OptimizedPrimeCount(bigNum);
+            //int[] test = OptimizedPrimeCount(bigNum);
             //PrintGroup(test, 0);
 
             TimeSpan wasted = DateTime.Now.Subtract(time);
             Console.WriteLine("Всё закончилось :(");
-            //Console.WriteLine($"Было сформировано {Convert.ToInt32(Math.Floor(Math.Log2(bigNum))) + 1} групп.");
+            Console.WriteLine($"Было сформировано {Convert.ToInt32(Math.Floor(Math.Log2(bigNum))) + 1} групп.");
             Console.WriteLine($"Для этого потребовалось {wasted.TotalSeconds} секунд машинного времени.");
             Console.ReadKey();
 
