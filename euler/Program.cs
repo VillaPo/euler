@@ -16,7 +16,7 @@ namespace euler
         /// </summary>
         /// <param name="N"></param>
         /// <returns></returns>
-        static int[] OptimizedPrimeCount(int N)
+        static byte[] OptimizedPrimeCount(int N)
         {
             int[] lp = new int[N + 1];   //массив наименьших делителей, изначально напротив каждого числа (индекса массива) стоит 0
 
@@ -36,7 +36,7 @@ namespace euler
             // после того, как сформировали массив с минимальными делителями всех чисел, перепишем его под наши нужды:
             // напротив каждого индекса должен стоять номер группы, в которую оно попадает, равный числу его простых множителей, включая 1
 
-            int[] allNums = new int[N + 1];   
+            byte[] allNums = new byte[N + 1];   
 
             // allNums[0] = 0 - ноль нас не интересует
 
@@ -50,7 +50,7 @@ namespace euler
                 else
                 {
                     q = i / lp[i];                                          // если не простое, находим частное от деления на наименьший множитель
-                    allNums[i] = 1 + allNums[q];                                      // и подсчитываем число его простых множителей как 1 + к-во множителей частного
+                    allNums[i] = (byte)(1 + allNums[q]);                    // и подсчитываем число его простых множителей как 1 + к-во множителей частного
                 }
             }
             return allNums;
@@ -62,9 +62,9 @@ namespace euler
         /// </summary>
         /// <param name="N">Верхняя граница числового отрезка</param>
         /// <returns>Массив, содержащий количество простых множителей (включая 1) для каждого значения индекса</returns>
-        static int[] Factorized(int N)
+        static byte[] Factorized(int N)
         {
-            int[] allNums = new int[N + 1];   //изначально напротив каждого числа (индекса массива) стоит 0
+            byte[] allNums = new byte[N + 1];   //изначально напротив каждого числа (индекса массива) стоит 0
 
             // allNums[0] = 0 - ноль нас не интересует
 
@@ -76,16 +76,16 @@ namespace euler
 
             for (int i = 4; i < allNums.Length; i++)
             {
-                isPrime = true;                                         // начальное предположение
-                for (int j = 2; j <= (int)Math.Sqrt(i); j++)            //нет смысла искать простые множители числа, большие его квадратного корня
+                isPrime = true;                                             // начальное предположение
+                for (int j = 2; j <= (int)Math.Sqrt(i); j++)                //нет смысла искать простые множители числа, большие его квадратного корня
                 {
-                    if (allNums[j] == 2)                                //проверяем делимость только на простые числа!
+                    if (allNums[j] == 2)                                    //проверяем делимость только на простые числа!
                     {
 
                         if (i % j == 0) // нужно оптимизировать иф
                         {
                             q = i / j;
-                            allNums[i] = 1 + allNums[q];                    // если разделилось - плюсуем единичку
+                            allNums[i] = (byte)(1 + allNums[q]);            // если разделилось - плюсуем единичку
                                                                             // и добавляем все делители полученного частного, которые уже известны
                             isPrime = false;                                // и оно точно не простое
                             break;                                          // для этого числа работа сделана
@@ -120,11 +120,11 @@ namespace euler
             Console.WriteLine();
         }
 
-        static void PrintAllGroups(int[] nums)
+        static void PrintAllGroups(byte[] nums)
         {
             int count = Convert.ToInt32(Math.Floor(Math.Log2(nums.GetUpperBound(0)))) + 1;
 
-            for (int i = 1; i <= count; i++)
+            for (byte i = 1; i <= count; i++)
             {
                 Console.Write($"Группа {i}:\t");
                 for (int j = 0; j < nums.Length; j++)
@@ -144,7 +144,7 @@ namespace euler
         static void Main(string[] args)
         {
             // *************************************************************************************************************
-            int bigNum = 1_000_000_000;                                                     // длинна числового ряда от 1 до bigNum
+            int bigNum = 100_000_000;                                                     // длинна числового ряда от 1 до bigNum
             DateTime time = DateTime.Now;
 
             //byte[] mask = new byte[bigNum+1];                                           // маска чисел, инициализируем единицами:
@@ -228,7 +228,7 @@ namespace euler
             //    //Console.ReadKey();
             //}
             // ******************************************************************************************
-            int[] groups = OptimizedPrimeCount(bigNum);
+            byte[] groups = OptimizedPrimeCount(bigNum);
             //PrintAllGroups(groups);
             //int[] test = OptimizedPrimeCount(bigNum);
             //PrintGroup(test, 0);
