@@ -98,17 +98,11 @@ namespace euler
             return allNums;
         }
 
-        /// <summary>
-        /// Определяет, делится ли одно число на другое без остатка.
-        /// </summary>
-        /// <param name="a">делитель</param>
-        /// <param name="b">делимое</param>
-        /// <returns>true - если b не делится на a без остатка, false - если делится</returns>
-        static bool Aliquant(int a, int b)
-        {
-            return (b % a != 0);
-        }
-
+       /// <summary>
+       ///  Печатает массив без нулей как группу с заданным номером. Нужна для отладки кода.
+       /// </summary>
+       /// <param name="group"></param>
+       /// <param name="num"></param>
         static void PrintGroup(int[] group, int num)
         {
             Console.Write($"Группа {num}:\t");
@@ -120,6 +114,11 @@ namespace euler
             Console.WriteLine();
         }
 
+        /// <summary>
+        /// Анализирует полученный байтовый массив в котором записаны номера групп, в которые входит число,
+        /// представленное индексом, и выводит на печать эти группы.
+        /// </summary>
+        /// <param name="nums"></param>
         static void PrintAllGroups(byte[] nums)
         {
             int count = Convert.ToInt32(Math.Floor(Math.Log2(nums.GetUpperBound(0)))) + 1;
@@ -143,94 +142,17 @@ namespace euler
         /// <param name="args"></param>
         static void Main(string[] args)
         {
-            // *************************************************************************************************************
-            int bigNum = 100_000_000;                                                     // длинна числового ряда от 1 до bigNum
+            // ******************************************************************************************
+            int bigNum = 1_000_000_000;                           // длинна числового ряда от 1 до bigNum
             DateTime time = DateTime.Now;
 
-            //byte[] mask = new byte[bigNum+1];                                           // маска чисел, инициализируем единицами:
-
-            //for (int i = 2; i < mask.Length; i++)
-            //{
-            //    mask[i] = 1;
-            //}
-
-            //int[] deb_group = new int[bigNum];                                          // временный массив для хранения группы, нужен только для отладки
-            //int mCount = 1;                                                             // счетчик групп чисел. Первая группа состоит из одного числа - 1
             Console.WriteLine($"Заданный числовой отрезок: от 1 до {bigNum : ### ### ### ###}.\n");
-            //Console.WriteLine($"Группа 1:\t 1\n");
-            //int kGroup;                                                                 // индекс для обращения к элементу группы
-            //int iMask;                                                                  // индекс маски
-            //int lastPosFirst =1;                                                        // последний из найденных первых элементов группы
 
-            //while (true)
-            //{
-            //    iMask = lastPosFirst + 1;
-            //    for (kGroup = 0; kGroup < deb_group.Length; kGroup++)
-            //        deb_group[kGroup] = 0;
-            //    do                                                                      // находим первый элемент группы - первое число, которое не было ранее задействовано
-            //    {
-            //        if (mask[iMask] == 0)
-            //        {
-            //            iMask++;
-            //            continue;
-            //        }    
-            //        deb_group[0] = iMask;
-            //        mask[iMask] = 0;                                                // и маскируем его, чтобы больше не использовать
-            //        lastPosFirst = iMask;
-            //        iMask++;
-            //    }
-            //    while (deb_group[0] == 0 && iMask <= bigNum);
-
-            //    if (iMask > bigNum && deb_group[0] != 0)
-            //    {
-            //        mCount++;
-            //        Console.WriteLine($"Группа {mCount}:\t {deb_group[0]}");
-
-            //        break;
-            //    }
-            //    else if (iMask > bigNum) break;
-
-
-
-            //    for (kGroup = 1; kGroup < deb_group.Length; kGroup++)                              // для записи каждого нового числа в группе
-            //    {
-            //        bool isOK;                                                          // флаг того, что число может быть записано в текущую группу
-            //        for (int j = iMask; j < mask.Length; j++)                                // прогоняем все немаскированные числа по каждому числу, которое уже есть в группе
-            //        {
-            //            if (mask[j] == 0) continue;
-
-            //            isOK = true;                                                
-
-            //            for (int k = 0; k < kGroup; k++)
-            //            {
-            //                if ((j % deb_group[k]) == 0)
-            //                {
-            //                    isOK = false;
-            //                    break;
-            //                }
-            //            }
-
-            //            if (isOK)
-            //            {
-            //                deb_group[kGroup] = j;
-            //                mask[j] = 0;
-            //                iMask = j + 1;
-            //                break;
-            //            }
-
-            //        }
-            //        if (deb_group[kGroup] == 0) break;
-            //    }
-
-
-            //    mCount++;
-            //    PrintGroup(deb_group, mCount);
-            //    //Console.ReadKey();
-            //}
             // ******************************************************************************************
             byte[] groups = OptimizedPrimeCount(bigNum);
+           
             //PrintAllGroups(groups);
-            //int[] test = OptimizedPrimeCount(bigNum);
+            
             //PrintGroup(test, 0);
 
             TimeSpan wasted = DateTime.Now.Subtract(time);
