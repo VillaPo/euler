@@ -25,7 +25,7 @@ namespace euler
                     if (j * (long)i > N) break;                         // если за пределами отрезка, бросаем это дело (теоретически, здесь возможно переполнение int)
                     if (prFacktNum[j] == 2)                             // если j - простое
                     {
-                        prFacktNum[i * j] = checked((byte)(prFacktNum[i] + 1)); // все кратные ему числа будут иметь + 1 простой множитель
+                        prFacktNum[i * j] = Convert.ToByte(prFacktNum[i] + 1); // все кратные ему числа будут иметь + 1 простой множитель
                                                                         
                     }
                 }
@@ -51,7 +51,7 @@ namespace euler
                     if (p * (long)i > N) break;                         // если за пределами отрезка, бросаем это дело (теоретически, здесь возможно переполнение int)
                     if (lp[p] == 0)                                     // если p  простое
                     {
-                        lp[i * p] = checked((ushort)p);                 // все кратные ему числа будут иметь такой минимальный делитель (по идее, p не превысит
+                        lp[i * p] = Convert.ToByte(p);                  // все кратные ему числа будут иметь такой минимальный делитель (по идее, p не превысит
                                                                         // корень квадратный из N, т.е. 65535 должно хватить для отрезка до 4 294 836 225, а у нас
                                                                         // к тому времени вылетит за диапазон значений p * i
                                                                         // однако такая экономия памяти примерно в 3 раза замедляет работу алгоритма при N = 1 млрд !
@@ -113,7 +113,7 @@ namespace euler
                         if (i % j == 0) // нужно оптимизировать иф
                         {
                             q = i / j;
-                            allNums[i] = (byte)(1 + allNums[q]);            // если разделилось - плюсуем единичку
+                            allNums[i] = Convert.ToByte(1 + allNums[q]);    // если разделилось - плюсуем единичку
                                                                             // и добавляем все делители полученного частного, которые уже известны
                             isPrime = false;                                // и оно точно не простое
                             break;                                          // для этого числа работа сделана
@@ -149,7 +149,7 @@ namespace euler
         /// <param name="nums"></param>
         static void PrintAllGroups(byte[] nums)
         {
-            int count = Convert.ToInt32(Math.Floor(Math.Log2(nums.GetUpperBound(0)))) + 1;
+            int count = Convert.ToByte(Math.Floor(Math.Log2(nums.GetUpperBound(0)))) + 1;
 
             for (byte i = 1; i <= count; i++)
             {
