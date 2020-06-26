@@ -1,5 +1,7 @@
 ﻿using System;
+using System.IO;
 using System.Security.Authentication;
+using System.Text;
 
 namespace euler
 {    
@@ -11,7 +13,23 @@ namespace euler
         // Все остальные числа будут формировать группы с номером, равным количеству их простых множителей (включая 1),
         // т.к. внутри группы они не будут взаимно делиться.
 
-        static byte[] SuperFastPrimeCount(int N)
+        static string FindNumbers(string str)
+        {
+            StringBuilder numStr = new StringBuilder();
+
+            char[] digits = new char[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9' };
+            int pos = str.IndexOfAny(digits);
+            if (pos < 0) return String.Empty;
+
+            do
+            {
+                numStr.Append(str[pos++]);
+            } while (char.IsDigit(str[pos]));
+
+            return Convert.ToString(numStr);
+        }
+
+        static byte[] CountByEuler(int N)
         {
             byte[] prFacktNum = new byte[N + 1];                         // массив, содержащий количество простых множителей, включая 1, для каждого числа-инедекса
             prFacktNum[1] = 1;
@@ -170,25 +188,136 @@ namespace euler
         /// <param name="args"></param>
         static void Main(string[] args)
         {
-            // ******************************************************************************************
-            int bigNum = 2000000000;                           // длинна числового ряда от 1 до bigNum
-            DateTime time = DateTime.Now;
-
-            Console.WriteLine($"Заданный числовой отрезок: от 1 до {bigNum : ### ### ### ###}.\n");
+            //string myPath = Directory.GetCurrentDirectory();
+            Console.WriteLine("Определение на заданном числовом отрезке групп целых чисел, которые не делятся друг на друга\n");
+            Console.WriteLine("Текущая папка: " + Directory.GetCurrentDirectory());
 
             // ******************************************************************************************
-            //byte[] groups = OptimizedPrimeCount(bigNum);
-            byte[] groups = SuperFastPrimeCount(bigNum);
-                       
-            //PrintAllGroups(groups);
+            DateTime startTime = new DateTime();
+            TimeSpan wasted = new TimeSpan();
+            int bigNum; // = 2000000000;                           // длинна числового ряда от 1 до bigNum
             
-            //PrintGroup(test, 0);
+            do
+            {
+                Console.Write("Введите имя файла с данными (и путь, если файл находится в другой папке):");
+                string path = Console.ReadLine();
+                if (!File.Exists(@path))
+                {
+                    Console.WriteLine("Файл не найден.");
+                    break;
+                }
 
-            TimeSpan wasted = DateTime.Now.Subtract(time);
-            Console.WriteLine("Всё закончилось :(");
-            Console.WriteLine($"Было сформировано {Convert.ToInt32(Math.Floor(Math.Log2(bigNum))) + 1} групп.");
-            Console.WriteLine($"Для этого потребовалось {wasted.TotalSeconds} секунд машинного времени.");
+                string data = File.ReadAllText(@path);
+               
+                if (!int.TryParse(FindNumbers(data), out bigNum))
+                {
+                    Console.WriteLine("Указанный файл содержит некорректные данные.");
+                    break;
+                }
+                if (bigNum > 2_000_000_000)
+                {
+                    Console.WriteLine($"Верхняя граница {bigNum: ### ### ### ###} слишком велика. Максимальная граница числового отрезка: 2 000 000 000.");
+                    break;
+                }
+
+                Console.WriteLine($"Данные получены. Задан числовой отрезок от 1 до {bigNum}.");
+                Console.Write("Для подсчета количества групп нажмите \"1\", для записи групп в файл нажмите \"2\":");
+                ConsoleKeyInfo ch = new ConsoleKeyInfo();
+                do
+                {
+                    ch = Console.ReadKey(true);
+                } while (ch.KeyChar != '1' && ch.KeyChar != '2');
+               
+                Console.WriteLine();
+                switch (ch.KeyChar)
+                {
+                    case '1':
+                        startTime = DateTime.Now;
+                        Console.WriteLine($"Количество групп подсчитано: {Convert.ToInt32(Math.Floor(Math.Log2(bigNum))) + 1}");
+                        wasted = DateTime.Now.Subtract(startTime);
+                        Console.WriteLine($"Для посчета потребовалось {wasted.TotalSeconds} секунд машинного времени.");
+                        break;
+
+                    case '2':
+                        Console.WriteLine("Каким алгоритмом Вы желаете воспользоваться для распределения чисел на группы?");
+                        Console.Write("Решето Эратосфена - нажмите \"1\", Решето Эйлера - нажмите \"2\":");
+                        ch = Console.ReadKey();
+                        Console.WriteLine();
+                       
+
+                        if (ch.KeyChar == '1')
+                        {
+                            Console.WriteLine("Этот метод доступен только в зарегистрированной версии");
+                            
+                        }
+                        else
+                        {
+                            Console.WriteLine("Производится распределение чисел на группы, это может занять некоторое время...");
+                            startTime = DateTime.Now;
+                            byte[] group = CountByEuler(bigNum);
+                            wasted = DateTime.Now.Subtract(startTime);
+                            Console.WriteLine($"Все числа распределены. Для этого потребовалось {wasted.TotalSeconds} секунд машинного времени.");
+                            Console.Write($"Введите имя файла для записи и путь. По умолчанию файл будет создан в текущей папке программы: ");
+                            path = Console.ReadLine();
+                            if (!File.Exists(@path))
+                                File.Delete(@path);
+                            Console.WriteLine("Идет запись файла, пожалуйста, не отключайте компьютер...");
+                            StreamWriter outputFile = new StreamWriter(path);
+                            using (outputFile)
+                            {
+                                for (int j = 0; j < group.Length; j++)
+                                {
+                                    outputFile.WriteLine($"{j,5}: {group[j],3}");
+                                }
+
+                                for (byte i = 1; i <= Convert.ToByte(Math.Floor(Math.Log2(bigNum))) + 1; i++)
+                                {
+                                    outputFile.Write($"Группа {i}:");
+                                    
+                                    for (int j = 0; j < group.Length; j++)
+                                    {
+                                        if (group[j] == i)
+                                            outputFile.Write($"\t{j}");
+                                    }
+                                    outputFile.WriteLine();
+                                } 
+                            }
+                            wasted = DateTime.Now.Subtract(startTime);
+                            Console.WriteLine($"Запись завершена. На всю процедуру потребовалось {wasted.TotalSeconds} секунд машинного времени.");
+
+                        }
+
+                        break;
+
+                }
+
+                break;
+            } while (true);
+
             Console.ReadKey();
+
+
+
+
+
+
+            //DateTime time = DateTime.Now;
+
+            //Console.WriteLine($"Заданный числовой отрезок: от 1 до {bigNum : ### ### ### ###}.\n");
+
+            //// ******************************************************************************************
+            ////byte[] groups = OptimizedPrimeCount(bigNum);
+            //byte[] groups = SuperFastPrimeCount(bigNum);
+
+            ////PrintAllGroups(groups);
+
+            ////PrintGroup(test, 0);
+
+            //TimeSpan wasted = DateTime.Now.Subtract(time);
+            //Console.WriteLine("Всё закончилось :(");
+            //Console.WriteLine($"Было сформировано {Convert.ToInt32(Math.Floor(Math.Log2(bigNum))) + 1} групп.");
+            //Console.WriteLine($"Для этого потребовалось {wasted.TotalSeconds} секунд машинного времени.");
+            //Console.ReadKey();
 
         }
     }
