@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.IO.Compression;
 using System.Security.Authentication;
 using System.Text;
 
@@ -18,7 +19,7 @@ namespace euler
         /// Находит в строке первые попавшиеся цифры, идущие подряд, и формирует из них подстроку.
         /// </summary>
         /// <param name="str">строка с цифрами</param>
-        /// <returns>подстрока, состоящая только из цифр или пустая строка</returns>
+        /// <returns>подстрока, состоящая только из цифр, или пустая строка</returns>
         static string FindNumbers(string str)
         {
             StringBuilder numStr = new StringBuilder();
@@ -70,7 +71,7 @@ namespace euler
                 
                 for (int j = 2; j <= i; j++)
                 {
-                    if (j * (long)i > N) break;                             // теоретически, здесь возможно переполнение int и некорректное сравнение N c отрицательным числом
+                    if (j * (long)i > N) break;                             // приведение к long т.к. здесь возможно переполнение int и => некорректное сравнение c N 
                     if (prNumber[j] == 2)                             
                     {
                         prNumber[i * j] = Convert.ToByte(prNumber[i] + 1);  // все кратные ему числа будут иметь + 1 простой множитель.  
@@ -84,7 +85,7 @@ namespace euler
         /// <summary>
         /// Подсчитывает количество простых множителей для каждого целого числа от 1 до N используя решето Эратосфена. 
         /// Быстрее Эйлера, но требует в два раза больше памяти, т.к. использует один и тот же массив и для записи
-        /// наименьшего делителя числа, и для записи общего количества простых множителей.
+        /// наименьшего делителя числа, и для записи общего количества простых множителей (номера группы).
         /// </summary>
         /// <param name="N"></param>
         /// <returns>Массив, содержащий количество простых множителей (включая 1) для каждого значения индекса</returns>
@@ -100,7 +101,7 @@ namespace euler
                 {
                     for (int j = i * 2; j < prNumber.Length; j += i)
                         if (prNumber[j] == 0)
-                            prNumber[j] = Convert.ToUInt16(i);                  // вопрос
+                            prNumber[j] = Convert.ToUInt16(i);                  // предполагается, что в этом месте i никогда не превысит корня квадратного из N
                     prNumber[i] = 2;
                 }
                 else
@@ -138,7 +139,7 @@ namespace euler
                     if (allNums[j] == 2)                                    //проверяем делимость только на простые числа!
                     {
 
-                        if (i % j == 0) // нужно оптимизировать иф
+                        if (i % j == 0) // можно оптимизировать иф
                         {
                             q = i / j;
                             allNums[i] = Convert.ToByte(1 + allNums[q]);    // если разделилось - плюсуем единичку
@@ -164,20 +165,25 @@ namespace euler
         static void Main(string[] args)
         {
             Console.WriteLine("Определение на заданном числовом отрезке групп целых чисел, которые не делятся друг на друга\n");
-            Console.WriteLine("Текущая папка: " + Directory.GetCurrentDirectory());
-
-            DateTime startTime = new DateTime();
-            TimeSpan wasted = new TimeSpan();
+            
+            DateTime startTime;
+            TimeSpan wasted;
             int bigNum;                                             // верхняя граница
-            int maxNum = 1_000_000_000;                             
-            char ch;
+            int maxNum = 1_000_000_000;                             // предельное значение
             string report = "log.txt";                              // лог-файл
             string output = "output.txt";                           // текстовый вывод
-            string compressed = "output.zip";                       // сжатый файл          
+            string compressed = "output.gzip";                      // сжатый файл   
+            string datatxt = "data.txt";                            // файл с данными по умолчанию
+
+            string defPath = Directory.GetCurrentDirectory() + "\\" + datatxt;
+            Console.WriteLine("Файл данных по умолчанию: " + defPath);
             do
             {
-                Console.Write("Введите имя файла с данными (и путь, если файл находится в другой папке):");
+                Console.Write("Введите новое имя файла с данными и путь (Enter - оставить значение по умолчанию):");
                 string path = Console.ReadLine();
+                if (String.IsNullOrEmpty(path))
+                    path = defPath;
+                
                 if (!File.Exists(@path))
                 {
                     Console.WriteLine("Файл не найден.");
@@ -202,9 +208,9 @@ namespace euler
                 if (Choice("Для подсчета количества групп нажмите \"1\", для записи групп в файл нажмите \"2\":", '1', '2') == '1')
                 {
                     startTime = DateTime.Now;
-                    Console.WriteLine($"Количество возможных групп: {Convert.ToInt32(Math.Floor(Math.Log2(bigNum))) + 1}");
+                    Console.WriteLine($"Количество возможных групп: {Convert.ToByte(Math.Floor(Math.Log2(bigNum))) + 1}");
                     wasted = DateTime.Now.Subtract(startTime);
-                    Console.WriteLine($"Для подсчета потребовалось {wasted.TotalMilliseconds} милисекунд машинного времени.");
+                    Console.WriteLine($"Для подсчета потребовалось {wasted.TotalMilliseconds} милисекунд.");
                     break;
                 }
                 else
@@ -213,57 +219,67 @@ namespace euler
                     if (Choice("Предыдущие результаты будут перезаписаны! Продолжить? (y/n)", 'y', 'n') == 'N')
                         break;
                 }
-                               
-                //path = Console.ReadLine();
-                if (!File.Exists(report))
-                    File.Delete(report);
-                if (!File.Exists(output))
-                    File.Delete(output);
 
                 Console.WriteLine("Производится распределение чисел на группы, это может занять некоторое время...");
                 startTime = DateTime.Now;
-                byte[] group = new byte[bigNum + 1];
-                group = CountByEuler(bigNum);
+                //var group = CountByEuler(bigNum);                                                           // с решетом Эйлера (медленнее, меньше памяти, дольше пишет файл)                             
+                var group = CountByEratosfen(bigNum);                                                       // с решетом Эратосфена
                
                 wasted = DateTime.Now.Subtract(startTime);
                 Console.WriteLine($"Все числа распределены. Для этого потребовалось {wasted.TotalSeconds} секунд.");
                 
                 Console.WriteLine("Идет запись файла, пожалуйста, не отключайте компьютер...");
                 startTime = DateTime.Now;
-                var logFile = new StreamWriter(report);
-                var outputFile = new StreamWriter(output);
-                int count, megaCount = 0;
-                using (logFile)
+                
+                int count, megaCount = 0;                                       // счетчики чисел для отчета
+                
+                using (StreamWriter logFile = new StreamWriter(report, false), outputFile = new StreamWriter(output, false))
                 {
                     logFile.WriteLine($"Время работы алгоритма: {wasted.TotalSeconds} секунд.");
-                    using(outputFile)
+                    
+                    for (byte i = 1; i <= Convert.ToByte(Math.Floor(Math.Log2(bigNum))) + 1; i++)
                     {
-                        for (byte i = 1; i <= Convert.ToByte(Math.Floor(Math.Log2(bigNum))) + 1; i++)
-                        {
-                            outputFile.Write($"Группа {i}:");
-                            logFile.Write($"Группа {i}:");
-                            count = 0;
+                        outputFile.Write($"Группа {i}:");
+                        logFile.Write($"Группа {i}:");
+                        count = 0;
 
-                            for (int j = 0; j < group.Length; j++)
+                        for (int j = 0; j < group.Length; j++)
+                        {
+                            if (group[j] == i)
                             {
-                                if (group[j] == i)
-                                {
-                                    outputFile.Write($"\t{j}");
-                                    count++;
-                                }
+                                outputFile.Write($"\t{j}");
+                                count++;
                             }
-                            
-                            outputFile.WriteLine();
-                            logFile.WriteLine($" всего \t{count, 11 : ### ### ###} чисел");
-                            megaCount += count;
                         }
-                        logFile.WriteLine($"Всего обработано \t{megaCount: ### ### ### ###} чисел.");
+                            
+                        outputFile.WriteLine();
+                        logFile.WriteLine($" всего \t{count, 11 : ### ### ###} чисел");
+                        megaCount += count;
+                    }
+                    wasted = DateTime.Now.Subtract(startTime);
+                    logFile.WriteLine($"Всего обработано \t{megaCount: ### ### ### ###} чисел.\nВремя на запись файла: {wasted.TotalSeconds} секунд");
+                }
+
+               
+                var fileStat = new FileInfo(output);
+                Console.WriteLine($"Запись завершена.  Размер файла: {Math.Ceiling(fileStat.Length / 1024f)} KB, для записи потребовалось {wasted.TotalSeconds} секунд.");
+                Console.WriteLine("В текущей папке сформирован краткий отчет " + report);
+                
+                if (Choice("Заархивировать файл с данными? (y/n)", 'y', 'n') == 'N')
+                    break;
+
+                Console.WriteLine("Производится сжатие...");
+                using (FileStream source = new FileStream(output, FileMode.Open), zipped = File.Create(compressed))
+                {
+                    using (GZipStream pipe = new GZipStream(zipped, CompressionMode.Compress))
+                    {
+                        source.CopyTo(pipe); 
+                        Console.WriteLine("Сжатие файла {0} завершено. Было: {1} KB стало: {2} KB.",
+                                            output,
+                                            Math.Ceiling(source.Length / 1024f),
+                                            Math.Ceiling(zipped.Length / 1024f));
                     }
                 }
-                wasted = DateTime.Now.Subtract(startTime);
-                var fileStat = new FileInfo(output);
-                Console.WriteLine($"Запись завершена.  Размер файла: {Math.Ceiling(fileStat.Length / 1024f)} KB, для записи потребовалось {wasted.TotalSeconds} секунд машинного времени.");
-
 
                 break;
             } while (true);
